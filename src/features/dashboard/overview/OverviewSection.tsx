@@ -27,7 +27,7 @@ function OverviewSkeleton() {
         </CardContent>
       </Card>
 
-      <div className="grid gap-4 grid-cols-2 md:col-span-2">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:col-span-2">
         {Array.from({ length: 4 }).map((_, index) => (
           <Card key={index} className="gap-3 py-4">
             <CardHeader className="gap-0 px-4">
@@ -68,7 +68,7 @@ export function OverviewSection() {
         {data ? (
           <div className="grid gap-4 md:grid-cols-3">
             <WellnessScoreCard overview={data.overview} />
-            <div className="grid gap-4 grid-cols-2 md:col-span-2">
+            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:col-span-2">
               {data.overview.metrics.map((metric) => (
                 <OverviewMetricCard
                   key={metric.key}
