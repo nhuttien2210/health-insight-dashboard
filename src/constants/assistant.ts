@@ -6,15 +6,13 @@ export const SUGGESTED_QUESTIONS = [
   'What are some areas I could improve?',
 ] as const
 
-/** Turns kept in the request. The transcript on screen is not truncated. */
 export const MAX_CONTEXT_TURNS = 8
 
 export const ASSISTANT_DISCLAIMER =
   'General wellness information based on your data. Not medical advice.'
 
-export const DEFAULT_GEMINI_MODEL = 'gemini-2.0-flash'
+export const DEFAULT_GEMINI_MODEL = 'gemini-3.5-flash-lite'
 
-/** Low temperature: this assistant reports numbers, it does not write freely. */
 export const LLM_TEMPERATURE = 0.3
 
-export const LLM_MAX_OUTPUT_TOKENS = 900
+export const LLM_MAX_OUTPUT_TOKENS = Infinity

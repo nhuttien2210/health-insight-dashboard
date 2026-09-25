@@ -15,10 +15,6 @@ type AssistantState = {
   clearConversation: () => void
 }
 
-/**
- * Not persisted: a new session starts with a clean conversation, and answers
- * always reference the data currently on screen.
- */
 export const useAssistantStore = create<AssistantState>()(
   devtools(
     (set) => ({

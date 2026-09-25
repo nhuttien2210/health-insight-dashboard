@@ -1,7 +1,6 @@
-import { useState, type FormEvent, type KeyboardEvent } from 'react'
-import { Loader2, Send, X } from 'lucide-react'
+import { useRef, useState, type FormEvent, type KeyboardEvent } from 'react'
+import { ArrowUp, Loader2, StopCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Textarea } from '@/components/ui/textarea'
 
 type ChatComposerProps = {
   isPending: boolean
@@ -12,11 +11,14 @@ type ChatComposerProps = {
 
 export function ChatComposer({ isPending, disabled, onSubmit, onCancel }: ChatComposerProps) {
   const [value, setValue] = useState('')
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   function send() {
     if (value.trim().length === 0 || isPending || disabled) return
     onSubmit(value)
     setValue('')
+
+    if (textareaRef.current) textareaRef.current.style.height = 'auto'
   }
 
   function handleSubmit(event: FormEvent) {
@@ -24,7 +26,6 @@ export function ChatComposer({ isPending, disabled, onSubmit, onCancel }: ChatCo
     send()
   }
 
-  // Enter sends, Shift+Enter breaks the line - the convention people expect in a chat.
   function handleKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
     if (event.key === 'Enter' && !event.shiftKey) {
       event.preventDefault()
@@ -32,25 +33,71 @@ export function ChatComposer({ isPending, disabled, onSubmit, onCancel }: ChatCo
     }
   }
 
+  function handleInput() {
+    const el = textareaRef.current
+    if (!el) return
+    el.style.height = 'auto'
+    el.style.height = `${Math.min(el.scrollHeight, 120)}px`
+  }
+
+  const canSend = value.trim().length > 0 && !isPending && !disabled
+
   return (
-    <form onSubmit={handleSubmit} className="flex items-end gap-2">
-      <Textarea
+    <form
+      onSubmit={handleSubmit}
+      className={[
+        'ring-border/60 focus-within:ring-primary/50 relative flex items-end gap-2 rounded-xl border',
+        'bg-muted/40 px-3 py-2 ring-1 transition-all duration-200 focus-within:ring-2',
+        disabled ? 'opacity-50' : '',
+      ].join(' ')}
+    >
+      <textarea
+        ref={textareaRef}
         value={value}
         onChange={(event) => setValue(event.target.value)}
         onKeyDown={handleKeyDown}
+        onInput={handleInput}
         disabled={disabled}
         rows={1}
-        placeholder="Ask about your steps, sleep, nutrition or goals"
+        placeholder={
+          disabled
+            ? 'Waiting for dashboard data…'
+            : 'Ask about steps, sleep, nutrition or goals…'
+        }
         aria-label="Ask the health assistant"
-        className="max-h-28 min-h-9 resize-none"
+        className="flex-1 resize-none bg-transparent py-0.5 text-sm outline-none placeholder:text-muted-foreground/60 disabled:cursor-not-allowed"
+        style={{ minHeight: '24px', maxHeight: '120px' }}
       />
+
       {isPending ? (
-        <Button type="button" variant="outline" size="icon" onClick={onCancel} aria-label="Stop">
-          <X />
+        <Button
+          type="button"
+          size="icon"
+          variant="ghost"
+          className="text-destructive hover:bg-destructive/10 size-8 shrink-0 rounded-full"
+          onClick={onCancel}
+          aria-label="Stop generation"
+        >
+          <StopCircle className="size-4" />
         </Button>
       ) : (
-        <Button type="submit" size="icon" disabled={disabled || value.trim().length === 0} aria-label="Send">
-          {isPending ? <Loader2 className="animate-spin" /> : <Send />}
+        <Button
+          type="submit"
+          size="icon"
+          disabled={!canSend}
+          className={[
+            'size-8 shrink-0 rounded-full transition-all duration-200',
+            canSend
+              ? 'from-primary to-primary/80 bg-linear-to-br shadow-sm'
+              : 'bg-muted-foreground/20',
+          ].join(' ')}
+          aria-label="Send message"
+        >
+          {isPending ? (
+            <Loader2 className="size-4 animate-spin" />
+          ) : (
+            <ArrowUp className={['size-4', canSend ? 'text-primary-foreground' : 'text-muted-foreground'].join(' ')} />
+          )}
         </Button>
       )}
     </form>

@@ -1,5 +1,9 @@
 import { z } from 'zod'
-import { healthTargetsSchema, periodSummarySchema, trendSchema } from '@/apis/health/health.schema'
+import { activitySchema } from './activity/activity.schema'
+import { goalsSchema } from './goals/goals.schema'
+import { healthTargetsSchema, periodSummarySchema, trendSchema } from './health/health.schema'
+import { nutritionSchema } from './nutrition/nutrition.schema'
+import { sleepSchema } from './sleep/sleep.schema'
 
 export const metricAccentSchema = z.enum(['activity', 'sleep', 'nutrition', 'weight', 'heart'])
 
@@ -8,7 +12,6 @@ export const metricSnapshotSchema = z.object({
   label: z.string(),
   value: z.number(),
   unit: z.string(),
-  /** Null for metrics without a target, such as resting heart rate. */
   target: z.number().nullable(),
   percent: z.number().nullable(),
   trend: trendSchema,
@@ -23,7 +26,7 @@ export const weightPointSchema = z.object({
   weightKg: z.number(),
 })
 
-export const dashboardOverviewSchema = z.object({
+export const overviewSchema = z.object({
   rangeDays: z.number(),
   today: z.string(),
   wellnessScore: z.number(),
@@ -37,4 +40,12 @@ export const dashboardOverviewSchema = z.object({
   weightTrend: trendSchema,
   stepStreak: z.number(),
   loggedNutritionToday: z.boolean(),
+})
+
+export const userInformationSchema = z.object({
+  overview: overviewSchema,
+  activity: activitySchema,
+  sleep: sleepSchema,
+  nutrition: nutritionSchema,
+  goals: goalsSchema,
 })

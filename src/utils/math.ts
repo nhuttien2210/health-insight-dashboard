@@ -13,7 +13,6 @@ export function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max)
 }
 
-/** Capped at 100 so a progress bar never overflows. */
 export function percentOf(current: number, target: number): number {
   if (target <= 0) return 0
   return Math.round(Math.min((current / target) * 100, 100))

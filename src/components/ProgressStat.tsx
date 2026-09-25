@@ -5,7 +5,7 @@ import { cn } from '@/libs/cn'
 
 type ProgressStatProps = {
   label: string
-  /** Pre-formatted so each caller keeps control of units. */
+  
   valueLabel: string
   percent: number
   accent?: MetricAccent
@@ -13,7 +13,6 @@ type ProgressStatProps = {
   className?: string
 }
 
-/** Shared by the macro breakdown and the goal list. */
 export function ProgressStat({
   label,
   valueLabel,

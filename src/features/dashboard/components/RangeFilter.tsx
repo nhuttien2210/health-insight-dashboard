@@ -1,4 +1,4 @@
-import { RANGE_LABEL, RANGE_OPTIONS, type RangeDays } from '@/constants/range'
+import { RANGE_LABEL, RANGE_OPTIONS, RANGE_SHORT_LABEL, type RangeDays } from '@/constants/range'
 import { cn } from '@/libs/cn'
 import { selectSetRangeDays, useDashboardStore } from '../stores/useDashboardStore'
 import { useRangeDays } from '../hooks/useRangeDays'
@@ -22,14 +22,18 @@ export function RangeFilter() {
             onClick={() => setRangeDays(option)}
             aria-pressed={isActive}
             className={cn(
-              'rounded-md px-3 py-1.5 text-sm transition-colors',
+              'rounded-md py-1.5 text-sm transition-colors',
               'focus-visible:ring-ring/50 focus-visible:ring-[3px] focus-visible:outline-none',
+
+              'px-2 sm:px-3',
               isActive
                 ? 'bg-background text-foreground font-medium shadow-sm'
                 : 'text-muted-foreground hover:text-foreground',
             )}
           >
-            {RANGE_LABEL[option]}
+            {}
+            <span className="sm:hidden">{RANGE_SHORT_LABEL[option]}</span>
+            <span className="hidden sm:inline">{RANGE_LABEL[option]}</span>
           </button>
         )
       })}

@@ -1,6 +1,5 @@
 import type { MetricAccent } from '@/types/metric'
 
-/** One accent per health domain, shared by cards, badges and charts. */
 export const ACCENT_COLOR: Record<MetricAccent, string> = {
   activity: 'var(--chart-activity)',
   sleep: 'var(--chart-sleep)',

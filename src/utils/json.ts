@@ -1,7 +1,4 @@
-/**
- * Models wrap JSON in prose or code fences often enough that a plain JSON.parse
- * is not a reliable contract. Returns null instead of throwing.
- */
+
 export function extractJson(raw: string): unknown {
   const trimmed = raw.trim()
   if (trimmed.length === 0) return null

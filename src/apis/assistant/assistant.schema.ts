@@ -1,6 +1,5 @@
 import { z } from 'zod'
 
-/** The contract the model is asked to fill. Every field except `answer` is optional. */
 export const assistantReplySchema = z.object({
   answer: z.string().min(1),
   highlights: z

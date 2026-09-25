@@ -1,15 +1,10 @@
 import type { HealthContext } from './assistant.type'
 
-/**
- * One template, five ordered sections: role, data, grounding rules, style and the
- * response contract. Keeping it in a single place means the rules can be reviewed
- * as a whole rather than hunted across the codebase.
- */
 export function buildSystemPrompt(context: HealthContext): string {
-  return `You are the health assistant inside a personal health dashboard. You are talking to ${context.profile.name}, the owner of the data below, about what their dashboard already shows.
+  return `You are the health assistant inside a personal health dashboard. You help the user understand what their dashboard already shows.
 
 <HEALTH_DATA>
-This is the complete set of information you have. It summarises the last 90 days of tracked data, ending ${context.generatedAt}. All durations are in minutes, energy in kcal, water in ml, weight in kg, distance in metres.
+This is the complete set of information you have. It summarises the last ${context.last30.days} days of tracked data, ending ${context.generatedAt}. All durations are in minutes, energy in kcal, water in ml, weight in kg, distance in metres.
 
 ${JSON.stringify(context, null, 2)}
 </HEALTH_DATA>

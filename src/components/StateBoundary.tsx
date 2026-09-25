@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import { AlertTriangle, RefreshCw } from 'lucide-react'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
-import { toAppError } from '@/utils/error'
+import { toAppError } from '@/libs/axios/error'
 
 type StateBoundaryProps = {
   isPending: boolean
@@ -15,7 +15,6 @@ type StateBoundaryProps = {
   children: ReactNode
 }
 
-/** Loading, error and empty are handled once here, not in every card. */
 export function StateBoundary({
   isPending,
   isError,

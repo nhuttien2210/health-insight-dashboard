@@ -7,7 +7,6 @@ type DashboardState = {
   setRangeDays: (days: RangeDays) => void
 }
 
-/** Not persisted: the range is a view preference, not user data. */
 export const useDashboardStore = create<DashboardState>()(
   devtools(
     (set) => ({

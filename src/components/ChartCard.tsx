@@ -7,6 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/libs/cn'
 
 type ChartCardProps = {
@@ -35,7 +36,12 @@ export function ChartCard({
       </CardHeader>
       <CardContent className="space-y-3">
         {children}
-        {footer ? <div className="text-muted-foreground text-xs">{footer}</div> : null}
+        {footer !== undefined ? (
+          <div className="text-muted-foreground text-xs">
+            {}
+            {footer ?? <Skeleton className="h-3.5 w-3/4" />}
+          </div>
+        ) : null}
       </CardContent>
     </Card>
   )

@@ -2,7 +2,7 @@ import { useCallback, useRef } from 'react'
 import { useAskAssistantMutation } from '@/apis/assistant/assistant.query'
 import type { ChatMessage } from '@/apis/assistant/assistant.type'
 import { isLlmConfigured } from '@/libs/gemini'
-import { toAppError } from '@/utils/error'
+import { toAppError } from '@/libs/axios/error'
 import { useAssistantStore } from '../stores/useAssistantStore'
 import { useHealthContext } from './useHealthContext'
 
@@ -16,10 +16,6 @@ function createMessage(role: ChatMessage['role'], content: string): ChatMessage 
   }
 }
 
-/**
- * Owns the optimistic transcript: the question and a pending answer are appended
- * immediately, then the placeholder is filled in or marked as failed in place.
- */
 export function useAssistantChat() {
   const context = useHealthContext()
   const messages = useAssistantStore((state) => state.messages)
@@ -38,7 +34,7 @@ export function useAssistantChat() {
 
       const userMessage = createMessage('user', trimmed)
       const pendingMessage = createMessage('assistant', '')
-      // Read the transcript at call time instead of closing over the rendered value.
+
       const history = useAssistantStore.getState().messages
 
       appendMessage(userMessage)

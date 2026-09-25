@@ -1,128 +1,79 @@
+import type { UserInformation } from '@/apis/dashboard/dashboard.type'
 import type { HealthContext } from '@/apis/assistant/assistant.type'
-import type { DailyRecord, UserProfile } from '@/apis/health/health.type'
-import { ACTIVITY_LEVEL_LABEL, GOAL_LABEL, WORKOUT_LABEL } from '@/constants/health'
-import { roundTo } from '@/utils/math'
-import { summarizePeriod } from './aggregate'
-import { hasNutrition } from './generateHistory'
-import { buildGoalProgress, buildRecommendations } from './goals'
-import {
-  calculateBmi,
-  calculateStreak,
-  calculateTargets,
-  calculateTrend,
-  calculateWellnessScore,
-  getBmiCategory,
-} from './metrics'
 
-function toSnapshot(records: DailyRecord[], profile: UserProfile) {
-  const summary = summarizePeriod(records, profile)
+export function buildContextFromUserInformation(data: UserInformation): HealthContext {
+  const { overview, activity, sleep, goals } = data
 
-  return {
-    days: summary.days,
-    avgSteps: summary.avgSteps,
-    avgActiveMinutes: summary.avgActiveMinutes,
-    avgSleepMinutes: summary.avgSleepMinutes,
-    avgSleepScore: summary.avgSleepScore,
-    avgCalories: summary.avgCalories,
-    avgProteinG: summary.avgProteinG,
-    avgWaterMl: summary.avgWaterMl,
-    avgRestingHeartRate: summary.avgRestingHeartRate,
-    latestWeightKg: roundTo(summary.latestWeightKg, 1),
-    totalWorkouts: summary.totalWorkouts,
+  const snapshot = {
+    days: overview.summary.days,
+    avgSteps: overview.summary.avgSteps,
+    avgActiveMinutes: overview.summary.avgActiveMinutes,
+    avgSleepMinutes: overview.summary.avgSleepMinutes,
+    avgSleepScore: overview.summary.avgSleepScore,
+    avgCalories: overview.summary.avgCalories,
+    avgProteinG: overview.summary.avgProteinG,
+    avgWaterMl: overview.summary.avgWaterMl,
+    avgRestingHeartRate: overview.summary.avgRestingHeartRate,
+    latestWeightKg: overview.summary.latestWeightKg,
+    totalWorkouts: overview.summary.totalWorkouts,
   }
-}
 
-/**
- * Pre-computed snapshot rather than raw records: the model is asked to explain
- * numbers, never to calculate them, and every figure here is the same one the
- * dashboard renders.
- */
-export function buildHealthContext(profile: UserProfile, history: DailyRecord[]): HealthContext {
-  const targets = calculateTargets(profile)
-  const last7 = history.slice(-7)
-  const previous7 = history.slice(-14, -7)
-  const last30 = history.slice(-30)
-  const previous30 = history.slice(-60, -30)
-  const bmi = calculateBmi(profile.weightKg, profile.heightCm)
-  const summary30 = summarizePeriod(last30, profile)
-
-  const trendOf = (selector: (record: DailyRecord) => number) =>
-    calculateTrend(last30.map(selector), previous30.map(selector))
-
-  const missingData: string[] = []
-  const today = history.at(-1)
-  if (today && !hasNutrition(today)) missingData.push('nutrition and water for today')
-  missingData.push('blood pressure, glucose, medication and any clinical history')
+  const metricTrend = (key: string) =>
+    overview.metrics.find((m) => m.key === key)?.trend ?? null
 
   return {
-    generatedAt: today?.date ?? '',
+    generatedAt: overview.today,
     profile: {
-      name: profile.name,
-      age: profile.age,
-      sex: profile.sex,
-      heightCm: profile.heightCm,
-      weightKg: profile.weightKg,
-      activityLevel: ACTIVITY_LEVEL_LABEL[profile.activityLevel],
-      goals: profile.goals.map((goal) => GOAL_LABEL[goal]),
-      bmi: roundTo(bmi, 1),
-      bmiCategory: getBmiCategory(bmi),
+      name: 'User',
+      age: 0,
+      sex: '',
+      heightCm: 0,
+      weightKg: overview.summary.latestWeightKg,
+      activityLevel: '',
+      goals: goals.goalProgress.map((g) => g.label),
+      bmi: overview.bmi,
+      bmiCategory: overview.bmiCategory,
     },
     targets: {
-      steps: targets.steps,
-      calories: targets.calories,
-      proteinG: targets.proteinG,
-      waterMl: targets.waterMl,
-      sleepMinutes: targets.sleepMinutes,
-      activeMinutes: targets.activeMinutes,
+      steps: overview.targets.steps,
+      calories: overview.targets.calories,
+      proteinG: overview.targets.proteinG,
+      waterMl: overview.targets.waterMl,
+      sleepMinutes: overview.targets.sleepMinutes,
+      activeMinutes: overview.targets.activeMinutes,
     },
-    last7: toSnapshot(last7, profile),
-    last30: toSnapshot(last30, profile),
-    previous7: toSnapshot(previous7, profile),
+    last7: snapshot,
+    last30: snapshot,
+    previous7: snapshot,
     trends: {
-      steps: trendOf((record) => record.steps),
-      sleepMinutes: trendOf((record) => record.sleep.totalMinutes),
-      calories: trendOf((record) => record.nutrition.calories),
-      restingHeartRate: trendOf((record) => record.restingHeartRate),
-      weightKg: trendOf((record) => record.weightKg),
+      steps: metricTrend('steps'),
+      sleepMinutes: metricTrend('sleep'),
+      calories: metricTrend('calories'),
+      restingHeartRate: metricTrend('restingHeartRate'),
+      weightKg: overview.weightTrend,
     },
-    goalProgress: buildGoalProgress(profile, summary30, targets, last30.filter(hasNutrition)).map(
-      (goal) => ({
-        goal: goal.label,
-        metric: goal.metricLabel,
-        current: goal.current,
-        target: goal.target,
-        percentComplete: goal.percentComplete,
-      }),
-    ),
-    streaks: {
-      stepGoal: calculateStreak(history, (record) => record.steps >= targets.steps),
-      sleepGoal: calculateStreak(
-        history,
-        (record) => record.sleep.totalMinutes >= targets.sleepMinutes,
-      ),
-    },
-    recentWorkouts: last30
-      .flatMap((record) => record.workouts.map((workout) => ({ ...workout, date: record.date })))
-      .sort((a, b) => b.date.localeCompare(a.date))
-      .slice(0, 5)
-      .map((workout) => ({
-        date: workout.date,
-        type: WORKOUT_LABEL[workout.type],
-        durationMinutes: workout.durationMinutes,
-        caloriesBurned: workout.caloriesBurned,
-      })),
-    recommendations: buildRecommendations({
-      history,
-      current: last30,
-      previous: previous30,
-      summary: summary30,
-      targets,
-      rangeDays: 30,
-    }).map((recommendation) => ({
-      title: recommendation.title,
-      reason: recommendation.reason,
+    goalProgress: goals.goalProgress.map((g) => ({
+      goal: g.label,
+      metric: g.metricLabel,
+      current: g.current,
+      target: g.target,
+      percentComplete: g.percentComplete,
     })),
-    wellnessScore: calculateWellnessScore(last30, profile),
-    missingData,
+    streaks: {
+      stepGoal: overview.stepStreak,
+      sleepGoal: sleep.sleepStreak,
+    },
+    recentWorkouts: activity.recentWorkouts.slice(0, 5).map((w) => ({
+      date: w.date,
+      type: w.type,
+      durationMinutes: w.durationMinutes,
+      caloriesBurned: w.caloriesBurned,
+    })),
+    recommendations: goals.recommendations.map((r) => ({
+      title: r.title,
+      reason: r.reason,
+    })),
+    wellnessScore: overview.wellnessScore,
+    missingData: [],
   }
 }

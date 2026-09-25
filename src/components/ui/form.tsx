@@ -29,8 +29,6 @@ const FormFieldContext = React.createContext<FormFieldContextValue>(
   {} as FormFieldContextValue
 )
 
-// TTransformedValues is threaded through so a schema that parses strings into
-// numbers still type-checks against the form's control.
 const FormField = <
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,

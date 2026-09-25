@@ -33,7 +33,6 @@ export function FloatingAssistant() {
     )
   }
 
-  // Desktop gets a docked panel so the dashboard stays visible next to the answer.
   if (isDesktop) {
     return (
       <aside

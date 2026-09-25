@@ -15,7 +15,6 @@ function systemTheme(): Theme {
   return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
 }
 
-/** Defaults to the OS preference until the user picks a side. */
 export const useThemeStore = create<ThemeState>()(
   persist(
     (set, get) => ({

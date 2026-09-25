@@ -1,6 +1,6 @@
 import { MAX_CONTEXT_TURNS } from '@/constants/assistant'
 import { createGeminiProvider, type LlmMessage, type LlmProvider } from '@/libs/gemini'
-import { AppError, toAppError } from '@/utils/error'
+import { AppError, toAppError } from '@/libs/axios/error'
 import { extractJson } from '@/utils/json'
 import { assistantReplySchema } from './assistant.schema'
 import { buildSystemPrompt, REPAIR_INSTRUCTION } from './assistant.prompt'
@@ -13,7 +13,6 @@ function getProvider(): LlmProvider {
   return provider
 }
 
-/** Only the tail of the conversation is sent; the transcript on screen is untouched. */
 function toLlmMessages(history: ChatMessage[], question: string): LlmMessage[] {
   const recent = history
     .filter((message) => message.status === 'done')
@@ -26,13 +25,16 @@ function toLlmMessages(history: ChatMessage[], question: string): LlmMessage[] {
   return [...recent, { role: 'user', text: question }]
 }
 
-/**
- * Never throws on a malformed reply: the ladder falls back to the raw text so the
- * user still sees an answer, and only a genuinely empty response is an error.
- */
-export function parseReply(raw: string): AssistantReply {
+export function parseReply(raw: string, options?: { allowFallback?: boolean }): AssistantReply {
   const parsed = assistantReplySchema.safeParse(extractJson(raw))
   if (parsed.success) return parsed.data
+
+  if (!options?.allowFallback) {
+    throw new AppError(
+      'INVALID_RESPONSE',
+      'Failed to parse structured JSON from assistant.',
+    )
+  }
 
   const text = raw.trim()
   if (text.length === 0) {
@@ -73,13 +75,12 @@ export async function askAssistant({
     } catch (error) {
       if (toAppError(error).code !== 'INVALID_RESPONSE') throw error
 
-      // One corrective retry only - repeated attempts burn quota and rarely help.
       const repaired = await llm.chat({
         system,
         messages: [...messages, { role: 'user', text: REPAIR_INSTRUCTION }],
         signal,
       })
-      return parseReply(repaired)
+      return parseReply(repaired, { allowFallback: true })
     }
   } catch (error) {
     throw toAppError(error)

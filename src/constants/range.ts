@@ -8,6 +8,12 @@ export const RANGE_LABEL: Record<RangeDays, string> = {
   90: '90 days',
 }
 
+export const RANGE_SHORT_LABEL: Record<RangeDays, string> = {
+  7: '7d',
+  30: '30d',
+  90: '90d',
+}
+
 export const RANGE_COMPARISON_LABEL: Record<RangeDays, string> = {
   7: 'vs previous 7 days',
   30: 'vs previous 30 days',

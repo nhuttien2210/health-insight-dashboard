@@ -1,4 +1,4 @@
-/** 53-bit string hash, stable across sessions. */
+
 export function cyrb53(input: string, seed = 0): number {
   let h1 = 0xdeadbeef ^ seed
   let h2 = 0x41c6ce57 ^ seed
@@ -15,7 +15,6 @@ export function cyrb53(input: string, seed = 0): number {
   return 4294967296 * (2097151 & h2) + (h1 >>> 0)
 }
 
-/** Seeded PRNG. Same seed, same sequence - no Math.random anywhere in the data layer. */
 export function mulberry32(seed: number): () => number {
   let a = seed
 

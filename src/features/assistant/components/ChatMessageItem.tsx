@@ -6,9 +6,9 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/libs/cn'
 
 const SENTIMENT_CLASS: Record<Sentiment, string> = {
-  positive: 'border-success/40 text-success bg-success/10',
+  positive: 'border-emerald-500/30 text-emerald-600 bg-emerald-500/8 dark:text-emerald-400',
   neutral: 'border-border text-muted-foreground',
-  attention: 'border-warning/50 text-warning bg-warning/10',
+  attention: 'border-amber-500/40 text-amber-600 bg-amber-500/8 dark:text-amber-400',
 }
 
 type ChatMessageItemProps = {
@@ -17,11 +17,26 @@ type ChatMessageItemProps = {
   onFollowUp: (question: string) => void
 }
 
+function TypingDots() {
+  return (
+    <span className="flex items-end gap-0.75" aria-hidden>
+      {[0, 1, 2].map((i) => (
+        <span
+          key={i}
+          className="bg-primary/60 size-1.5 rounded-full animate-bounce"
+          style={{ animationDelay: `${i * 0.15}s`, animationDuration: '0.9s' }}
+        />
+      ))}
+    </span>
+  )
+}
+
 export function ChatMessageItem({ message, onRetry, onFollowUp }: ChatMessageItemProps) {
+
   if (message.role === 'user') {
     return (
       <div className="flex justify-end">
-        <p className="bg-primary text-primary-foreground max-w-[85%] rounded-2xl rounded-br-sm px-3 py-2 text-sm">
+        <p className="from-primary to-primary/80 text-primary-foreground max-w-[85%] rounded-2xl rounded-br-sm bg-linear-to-br px-3.5 py-2.5 text-sm leading-relaxed shadow-sm">
           {message.content}
         </p>
       </div>
@@ -30,71 +45,97 @@ export function ChatMessageItem({ message, onRetry, onFollowUp }: ChatMessageIte
 
   if (message.status === 'pending') {
     return (
-      <div className="text-muted-foreground flex items-center gap-2 text-sm" aria-live="polite">
-        <Sparkles className="size-4 animate-pulse" aria-hidden />
-        Reading your data...
+      <div
+        className="flex items-center gap-2.5"
+        aria-live="polite"
+        aria-label="Assistant is thinking"
+      >
+        <span className="from-primary/20 to-primary/10 flex size-7 shrink-0 items-center justify-center rounded-full bg-linear-to-br">
+          <Sparkles className="text-primary size-3.5 animate-pulse" aria-hidden />
+        </span>
+        <div className="bg-muted/70 flex items-center gap-2 rounded-2xl rounded-bl-sm px-3.5 py-2.5">
+          <TypingDots />
+          <span className="text-muted-foreground text-xs">Analysing your data…</span>
+        </div>
       </div>
     )
   }
 
   if (message.status === 'error') {
     return (
-      <div className="border-destructive/30 bg-destructive/5 space-y-2 rounded-2xl rounded-bl-sm border p-3">
-        <p className="text-destructive flex items-start gap-2 text-sm">
-          <AlertTriangle className="mt-0.5 size-4 shrink-0" aria-hidden />
-          {message.content}
-        </p>
-        <Button variant="outline" size="sm" onClick={() => onRetry(message.id)}>
-          <RefreshCw className="size-3.5" />
-          Try again
-        </Button>
+      <div className="flex gap-2.5">
+        <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-destructive/10">
+          <AlertTriangle className="text-destructive size-3.5" aria-hidden />
+        </span>
+        <div className="border-destructive/20 bg-destructive/5 flex-1 space-y-2 rounded-2xl rounded-bl-sm border p-3">
+          <p className="text-destructive text-sm">{message.content}</p>
+          <Button
+            variant="outline"
+            size="sm"
+            className="border-destructive/30 text-destructive hover:bg-destructive/10 h-7 gap-1.5 rounded-full text-xs"
+            onClick={() => onRetry(message.id)}
+          >
+            <RefreshCw className="size-3" />
+            Try again
+          </Button>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="bg-muted/60 space-y-3 rounded-2xl rounded-bl-sm p-3">
-      <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+    <div className="flex gap-2.5">
+      {}
+      <span className="from-primary/20 to-primary/10 mt-1 flex size-7 shrink-0 items-center justify-center rounded-full bg-linear-to-br">
+        <Sparkles className="text-primary size-3.5" aria-hidden />
+      </span>
 
-      {message.reply && message.reply.highlights.length > 0 ? (
-        <div className="flex flex-wrap gap-1.5">
-          {message.reply.highlights.map((highlight) => (
-            <Badge
-              key={`${highlight.label}-${highlight.value}`}
-              variant="outline"
-              className={cn('text-[11px]', SENTIMENT_CLASS[highlight.sentiment])}
-            >
-              {highlight.label}: {highlight.value}
-            </Badge>
-          ))}
-        </div>
-      ) : null}
+      <div className="bg-muted/50 min-w-0 flex-1 space-y-3 rounded-2xl rounded-bl-sm border border-transparent p-3.5">
+        {}
+        <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
 
-      {message.reply && message.reply.suggestions.length > 0 ? (
-        <ul className="space-y-1">
-          {message.reply.suggestions.map((suggestion) => (
-            <li key={suggestion} className="text-muted-foreground flex gap-2 text-sm">
-              <span aria-hidden>-</span>
-              <span>{suggestion}</span>
-            </li>
-          ))}
-        </ul>
-      ) : null}
+        {}
+        {message.reply && message.reply.highlights.length > 0 ? (
+          <div className="flex flex-wrap gap-1.5">
+            {message.reply.highlights.map((highlight) => (
+              <Badge
+                key={`${highlight.label}-${highlight.value}`}
+                variant="outline"
+                className={cn('rounded-full text-[11px]', SENTIMENT_CLASS[highlight.sentiment])}
+              >
+                {highlight.label}: <span className="ml-1 font-semibold">{highlight.value}</span>
+              </Badge>
+            ))}
+          </div>
+        ) : null}
 
-      {message.reply && message.reply.followUpQuestions.length > 0 ? (
-        <div className="flex flex-wrap gap-1.5 pt-1">
-          {message.reply.followUpQuestions.map((question) => (
-            <button
-              key={question}
-              type="button"
-              onClick={() => onFollowUp(question)}
-              className="border-border hover:bg-accent rounded-full border px-2.5 py-1 text-xs transition-colors"
-            >
-              {question}
-            </button>
-          ))}
-        </div>
-      ) : null}
+        {}
+        {message.reply && message.reply.suggestions.length > 0 ? (
+          <ul className="border-border/50 space-y-1.5 border-l-2 pl-3">
+            {message.reply.suggestions.map((suggestion) => (
+              <li key={suggestion} className="text-muted-foreground text-xs leading-relaxed">
+                {suggestion}
+              </li>
+            ))}
+          </ul>
+        ) : null}
+
+        {}
+        {message.reply && message.reply.followUpQuestions.length > 0 ? (
+          <div className="flex flex-wrap gap-1.5 pt-0.5">
+            {message.reply.followUpQuestions.map((question) => (
+              <button
+                key={question}
+                type="button"
+                onClick={() => onFollowUp(question)}
+                className="border-border/60 hover:border-primary/40 hover:bg-primary/5 hover:text-primary rounded-full border px-2.5 py-1 text-[11px] transition-all duration-150"
+              >
+                {question}
+              </button>
+            ))}
+          </div>
+        ) : null}
+      </div>
     </div>
   )
 }

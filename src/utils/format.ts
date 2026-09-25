@@ -43,7 +43,6 @@ export function formatClock(totalMinutes: number): string {
   return `${String(Math.floor(normalized / 60)).padStart(2, '0')}:${String(normalized % 60).padStart(2, '0')}`
 }
 
-/** Minutes since midnight, treating post-midnight bedtimes as late evening. */
 export function bedtimeToMinutes(bedtime: string): number {
   const [hours, minutes] = bedtime.split(':').map(Number)
   const raw = hours * 60 + minutes

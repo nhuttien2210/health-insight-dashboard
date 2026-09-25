@@ -8,7 +8,32 @@
       name="description"
       content="A personal health dashboard with trends, goals and an AI assistant grounded in your own data."
     />
+    <meta name="theme-color" content="#0f766e" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
     <title>Health Insight Dashboard</title>
+    <script>
+      // Apply the persisted (or system) theme before first paint so the page
+      // never flashes light then flips to dark. Mirrors useThemeStore.
+      ;(function () {
+        try {
+          var stored = localStorage.getItem('hid.theme.v1')
+          var theme = stored ? JSON.parse(stored).state.theme : null
+          if (theme !== 'light' && theme !== 'dark') {
+            theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+          }
+          var root = document.documentElement
+          root.classList.toggle('dark', theme === 'dark')
+          root.style.colorScheme = theme
+        } catch (_) {
+          /* localStorage blocked - fall back to CSS defaults */
+        }
+      })()
+    </script>
   </head>
   <body>
     <div id="root"></div>

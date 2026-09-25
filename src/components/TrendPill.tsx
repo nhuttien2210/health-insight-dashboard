@@ -10,10 +10,6 @@ type TrendPillProps = {
   className?: string
 }
 
-/**
- * Direction is not the same as good: a rise in resting heart rate is a warning,
- * so every metric declares whether higher values are desirable.
- */
 export function TrendPill({ trend, comparisonLabel, higherIsBetter, className }: TrendPillProps) {
   if (!trend) {
     return <p className={cn('text-muted-foreground text-xs', className)}>No comparison yet</p>

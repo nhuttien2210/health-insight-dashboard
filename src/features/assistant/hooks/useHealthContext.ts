@@ -1,18 +1,15 @@
 import { useMemo } from 'react'
+import { useDashboardQuery } from '@/apis/dashboard/dashboard.query'
 import type { HealthContext } from '@/apis/assistant/assistant.type'
-import { buildHealthContext } from '@/utils/health/context'
-import { generateHistory } from '@/utils/health/generateHistory'
-import { useProfileStore } from '@/stores/useProfileStore'
+import { buildContextFromUserInformation } from '@/utils/health/context'
+import { useRangeDays } from '@/features/dashboard/hooks/useRangeDays'
 
-/**
- * Rebuilt only when the profile changes. The assistant therefore reads exactly
- * the same history the dashboard renders.
- */
 export function useHealthContext(): HealthContext | null {
-  const profile = useProfileStore((state) => state.profile)
+  const rangeDays = useRangeDays()
+  const { data } = useDashboardQuery(rangeDays)
 
   return useMemo(() => {
-    if (!profile) return null
-    return buildHealthContext(profile, generateHistory(profile))
-  }, [profile])
+    if (!data) return null
+    return buildContextFromUserInformation(data)
+  }, [data])
 }

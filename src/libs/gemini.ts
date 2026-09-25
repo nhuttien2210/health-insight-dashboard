@@ -1,6 +1,6 @@
 import { GoogleGenAI } from '@google/genai'
 import { DEFAULT_GEMINI_MODEL, LLM_MAX_OUTPUT_TOKENS, LLM_TEMPERATURE } from '@/constants/assistant'
-import { AppError } from '@/utils/error'
+import { AppError } from '@/libs/axios/error'
 
 export type LlmMessage = {
   role: 'user' | 'model'
@@ -13,7 +13,6 @@ export type LlmChatInput = {
   signal?: AbortSignal
 }
 
-/** Swapping providers means writing another object with this shape. */
 export type LlmProvider = {
   name: string
   isConfigured: boolean
@@ -28,10 +27,6 @@ export function isLlmConfigured(): boolean {
   return readApiKey().length > 0
 }
 
-/**
- * The key is read here and nowhere else. Calling the API from the browser means
- * it ships in the bundle - a deliberate scope decision documented in the README.
- */
 export function createGeminiProvider(): LlmProvider {
   const apiKey = readApiKey()
   const model = import.meta.env.VITE_GEMINI_MODEL?.trim() || DEFAULT_GEMINI_MODEL

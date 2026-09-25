@@ -1,9 +1,8 @@
-import type { ActivityLevel, GoalType, WorkoutType } from '@/apis/health/health.type'
-
-// These literal arrays are the source of truth; the zod enums are built from them.
 export const SEX_VALUES = ['male', 'female', 'other'] as const
+export type Sex = (typeof SEX_VALUES)[number]
 
 export const ACTIVITY_LEVEL_VALUES = ['sedentary', 'light', 'moderate', 'active', 'athlete'] as const
+export type ActivityLevel = (typeof ACTIVITY_LEVEL_VALUES)[number]
 
 export const GOAL_VALUES = [
   'lose_weight',
@@ -12,8 +11,10 @@ export const GOAL_VALUES = [
   'increase_activity',
   'eat_better',
 ] as const
+export type GoalType = (typeof GOAL_VALUES)[number]
 
 export const WORKOUT_TYPE_VALUES = ['walk', 'run', 'cycle', 'strength', 'yoga', 'swim'] as const
+export type WorkoutType = (typeof WORKOUT_TYPE_VALUES)[number]
 
 export const ACTIVITY_LEVEL_LABEL: Record<ActivityLevel, string> = {
   sedentary: 'Sedentary - desk job, little exercise',
@@ -40,7 +41,6 @@ export const WORKOUT_LABEL: Record<WorkoutType, string> = {
   swim: 'Swim',
 }
 
-/** Mifflin-St Jeor multipliers used for TDEE. */
 export const ACTIVITY_FACTOR: Record<ActivityLevel, number> = {
   sedentary: 1.2,
   light: 1.375,
@@ -100,7 +100,6 @@ export const WORKOUT_INTENSITY: Record<WorkoutType, { kcalPerMinute: number; hea
 
 export const HISTORY_DAYS = 90
 
-/** A logged day counts as on target when it lands within 10% of the calorie goal. */
 export const CALORIE_TOLERANCE = 0.1
 
 export const PROFILE_LIMITS = {
